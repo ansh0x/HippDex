@@ -1,5 +1,7 @@
 # HippDex
 
+## Work In-Progess
+
 **Hippocampal Indexing for State-Space Models**
 
 HippDex is a hybrid context-management layer for Mamba and other state-space models (SSMs). It addresses the state bottleneck — the lossy compression of long contexts into fixed hidden states — by implementing a biological-inspired retrieval mechanism that resurfaces forgotten factual data on demand.
