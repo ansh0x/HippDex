@@ -18,7 +18,10 @@ HippDex applies this to SSMs:
     Resurfacing: Retrieved chunks are appended to the input, updating the hidden state with precise information without full reprocessing
 
 Think of it as context-aware decompression: zip the redundant past, retrieve only what the current state needs.
-How It Works
+
+---
+
+## How It Works
 
 ``` plain
 User Input → Mamba Hidden State (semantic)
@@ -34,10 +37,27 @@ User Input → Mamba Hidden State (semantic)
         Generate with resurfaced context
 ```
 
-Key components:
+---
+**Key components**:
 
 | Component  | Role |
 | -------------- | --------------- |
 | StateMonitor | Detects when hidden state diverges from recent factual claims |
 | HippocampalIndex | Sparse retrieval index over conversation history |
 | Resurfacer | Formats and injects retrieved chunks into the input stream |
+
+---
+
+## Benchmarks
+
+HippDex is intended to improve vanilla Mamba on:
+
+    Needle-in-a-haystack: Retrieve specific fact buried in long context
+    Long-context QA: Answer questions requiring distant factual recall
+    Conversation consistency: Maintain user-specific details across extended dialogue
+
+---
+
+## Background
+
+HippDex idea was first explored in my blog [Why current LLMs can't reach AGI (and more)](https://dev.to/ansh0x/why-current-llms-cant-reach-agi-and-more-5bc6), under the pretext of a hack. Which HippDex still is, since it's not a architectural fix, but rather a workaround.
