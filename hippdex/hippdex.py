@@ -1,7 +1,7 @@
-import os, json
-from typing import Any, Optional
+import os
+import hashlib
+from typing import List, Optional
 import numpy as np
-from llama_cpp.llama import Llama
 import onnxruntime as ort
 from tokenizers import Tokenizer
 
@@ -12,15 +12,32 @@ class HippDex:
         self.type = model_type
         self.embedder = Embedding()
 
-    def generate(self, msg: str):
-        pass
+    def generate(
+        self,
+        msg: str,
+        max_tokens: int = 1024,
+        temperature: float = 0.2,
+        repeat_penaly: float = 1.0,
+    ):
+        if self.embeddings is not None:
+            memories = "\n".join(self.embedder.get_similar(msg))
+            msg += memories
+
+        output = self.model.generate(
+            msg,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            repeat_penaly=repeat_penaly,
+        )
+
+        return output
 
     def save_state(self):
         pass
 
     @property
     def embeddings(self):
-        pass
+        return self.embedder.embeddings
 
     @property
     def internal_state(self):
@@ -33,7 +50,7 @@ class Embedding:
         model: Optional[ort.InferenceSession] = None,
         model_path: Optional[str] = None,
         tokenizer=None,
-    ) -> None:
+    ):
         """
         model: onnxruntime.InferenceSession
         model_path: str
@@ -63,7 +80,8 @@ class Embedding:
         self.tokenizer.enable_padding(length=16)
 
         # Load ONNX model
-        self.embeddings = np.array()
+        self.embeddings = None
+        self.texts = {}
 
     def _mean_pooling(self, token_embeddings, attention_mask):
         """Mean pooling"""
@@ -77,9 +95,7 @@ class Embedding:
 
         return sum_embeddings / sum_mask
 
-    def embed(self, text):
-        """Encode text to embedding"""
-        # Tokenize
+    def _get_embeddings(self, text):
         encoded = self.tokenizer.encode(text)
         # Run inference
         outputs = self.session.run(
@@ -97,4 +113,34 @@ class Embedding:
         # Normalize
         embeddings = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
 
-        self.embeddings = np.append(self.embeddings, embeddings[0])
+        return embeddings[0].
+
+    def get_similar(self, text, sim_threshold=0.8) -> List:
+        if self.embeddings is None:
+            return []
+        embedding = self._get_embeddings(text)
+
+        dots = self.embeddings @ embedding
+        norms = np.linalg.norm(self.embeddings, axis=1) * np.linalg.norm(embedding)
+        sim = dots / norms
+        matched_idx = np.where(sim > sim_threshold)[0]
+        matched_idx = matched_idx[np.argsort(sim[matched_idx])]
+        results = [list(self.texts.values())[i] for i in matched_idx]
+
+        return results
+
+    def embed(self, text):
+        """Encode text to embedding"""
+        # Tokenize
+        sha = hashlib.sha256(text.encode()).hexdigest()
+        if sha in self.texts.keys():
+            return
+
+        embeddings = self._get_embeddings(text)
+
+        if self.embeddings is not None:
+            self.embeddings = np.append(self.embeddings, embeddings.reshape(1, -1), axis=0)
+        else:
+            self.embeddings = np.array([embeddings])
+
+        self.texts[sha] = text

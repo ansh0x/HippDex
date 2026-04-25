@@ -6,11 +6,13 @@ description = "HippDex, a hippocampal-index inspired RAG-like system for Mamba m
 requires-python = ">=3.12"
 dependencies = [
   "onnxruntime>=1.24",
-  "llama_cpp_python>=0.3",
   "numpy>=2.4",
   "huggingface_hub>=1.7",
   "tokenizers>=3.6.2",
 ]
+
+[project.optional-dependencies]
+llama = ["llama_cpp_python>=0.3"]
 
 [build-system]
 requires = ["flit_core<4"]
