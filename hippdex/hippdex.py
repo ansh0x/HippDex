@@ -23,8 +23,11 @@ class HippDex:
             memories = "\n".join(self.embedder.get_similar(msg))
             msg += memories
 
-        output = self.model(
-            msg,
+        output = self.model.create_chat_completion(
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": msg},
+            ],
             max_tokens=max_tokens,
             temperature=temperature,
             repeat_penalty=repeat_penalty,
