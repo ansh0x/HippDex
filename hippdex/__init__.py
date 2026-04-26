@@ -1,3 +1,3 @@
-__version__ = "0.1.0"
+from .hippdex import *
 
-from .hippdex import HippDex, Embedding
+__version__ = "0.1.0"
