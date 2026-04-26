@@ -8,12 +8,8 @@ dependencies = [
   "onnxruntime>=1.24",
   "numpy>=2.4",
   "huggingface_hub>=1.7",
-  "tokenizers>=3.6.2",
+  "tokenizers>=0.21",
 ]
 
 [project.optional-dependencies]
 llama = ["llama_cpp_python>=0.3"]
-
-[build-system]
-requires = ["flit_core<4"]
-build-backend = "flit_core.buildapi"
