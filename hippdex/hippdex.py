@@ -17,7 +17,7 @@ class HippDex:
         msg: str,
         max_tokens: int = 1024,
         temperature: float = 0.2,
-        repeat_penaly: float = 1.0,
+        repeat_penalty: float = 1.0,
     ):
         if self.embeddings is not None:
             memories = "\n".join(self.embedder.get_similar(msg))
@@ -27,7 +27,7 @@ class HippDex:
             msg,
             max_tokens=max_tokens,
             temperature=temperature,
-            repeat_penaly=repeat_penaly,
+            repeat_penalty=repeat_penalty,
         )
 
         return output
