@@ -113,7 +113,7 @@ class Embedding:
         # Normalize
         embeddings = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
 
-        return embeddings[0].
+        return embeddings[0]
 
     def get_similar(self, text, sim_threshold=0.8) -> List:
         if self.embeddings is None:
@@ -139,7 +139,9 @@ class Embedding:
         embeddings = self._get_embeddings(text)
 
         if self.embeddings is not None:
-            self.embeddings = np.append(self.embeddings, embeddings.reshape(1, -1), axis=0)
+            self.embeddings = np.append(
+                self.embeddings, embeddings.reshape(1, -1), axis=0
+            )
         else:
             self.embeddings = np.array([embeddings])
 
