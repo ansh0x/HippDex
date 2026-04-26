@@ -7,10 +7,10 @@ from tokenizers import Tokenizer
 
 
 class HippDex:
-    def __init__(self, model, model_type: str) -> None:
+    def __init__(self, model, embedder, model_type: str = "GGUF") -> None:
         self.model = model
         self.type = model_type
-        self.embedder = Embedding()
+        self.embedder = embedder
 
     def generate(
         self,
