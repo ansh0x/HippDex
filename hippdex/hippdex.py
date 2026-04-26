@@ -23,7 +23,7 @@ class HippDex:
             memories = "\n".join(self.embedder.get_similar(msg))
             msg += memories
 
-        output = self.model.generate(
+        output = self.model(
             msg,
             max_tokens=max_tokens,
             temperature=temperature,
