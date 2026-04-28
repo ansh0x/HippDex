@@ -7,10 +7,11 @@ from tokenizers import Tokenizer
 
 
 class HippDex:
-    def __init__(self, model, embedder, model_type: str = "GGUF") -> None:
+    def __init__(self, model, embedder: Embedding, model_type: str = "GGUF") -> None:
         self.model = model
         self.type = model_type
         self.embedder = embedder
+        self.history = [{"role": "system", "content": "You are a helpful assistant."}]
 
     def generate(
         self,
@@ -22,16 +23,22 @@ class HippDex:
         if self.embeddings is not None:
             memories = "\n".join(self.embedder.get_similar(msg))
             msg += memories
+            print(f"Memories\n\n{memories}\n\n")
 
+        self.history += [{"role": "user", "content": msg}]
+
+        print(self.history)
         output = self.model.create_chat_completion(
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": msg},
-            ],
+            messages=self.history,
             max_tokens=max_tokens,
             temperature=temperature,
             repeat_penalty=repeat_penalty,
         )
+
+        self.history += [output["choices"][0]["message"]]
+        print(self.history)
+
+        # self.embedder.embed({"user": msg, "assistant": output[""]})
 
         return output
 
