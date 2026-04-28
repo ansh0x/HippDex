@@ -4,6 +4,7 @@ from typing import List, Optional
 import numpy as np
 import onnxruntime as ort
 from tokenizers import Tokenizer
+import bm25s
 
 
 class HippDex:
@@ -11,7 +12,9 @@ class HippDex:
         self.model = model
         self.type = model_type
         self.embedder = embedder
+        self.indexer = bm25s.BM25()
         self.history = [{"role": "system", "content": "You are a helpful assistant."}]
+        self.corpus = []
 
     def generate(
         self,
@@ -20,10 +23,24 @@ class HippDex:
         temperature: float = 0.2,
         repeat_penalty: float = 1.0,
     ):
+        memories = []
         if self.embeddings is not None:
-            memories = "\n".join(self.embedder.get_similar(msg))
-            msg += memories
-            print(f"Memories\n\n{memories}\n\n")
+            memories = self.embedder.get_similar(msg)
+        if self.corpus:
+            tokens = bm25s.tokenize(msg)
+            results, _ = self.indexer.retrieve(tokens, k=2)
+
+            for i in range(results.shape[1]):
+                index = results[0, i]
+                memories.append(self.corpus[index])
+
+        if len(memories) > 0:
+            memories.insert(0, "[START OF OLD MEMORIES]")
+            memories.insert(-1, "[END OF OLD MEMORIES]")
+            msg += "\n"
+            msg += "\n".join(memories)
+
+        print(f"Memories:\n\n{memories}\n\n")
 
         self.history += [{"role": "user", "content": msg}]
 
@@ -44,6 +61,16 @@ class HippDex:
 
     def save_state(self):
         pass
+
+    def store(self):
+
+        self.corpus = []
+        for chat in self.history:
+            self.corpus.append(chat["content"].split("[START OF OLD MEMORIES]")[0])
+        tokens = bm25s.tokenize(self.corpus, stopwords="en")
+        self.indexer.index(tokens)
+        self.embedder.embed(self.corpus[-2])
+        self.embedder.embed(self.corpus[-1])
 
     @property
     def embeddings(self):
