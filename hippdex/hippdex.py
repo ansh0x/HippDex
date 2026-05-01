@@ -28,15 +28,16 @@ class HippDex:
             memories = self.embedder.get_similar(msg)
         if self.corpus:
             tokens = bm25s.tokenize(msg)
-            results, _ = self.indexer.retrieve(tokens, k=2)
+            results, score = self.indexer.retrieve(tokens, k=2)
 
             for i in range(results.shape[1]):
-                index = results[0, i]
-                memories.append(self.corpus[index])
+                if score[0, i] > 0.8:
+                    index = results[0, i]
+                    memories.append(self.corpus[index])
 
         if len(memories) > 0:
             memories.insert(0, "[START OF OLD MEMORIES]")
-            memories.insert(-1, "[END OF OLD MEMORIES]")
+            memories.append("[END OF OLD MEMORIES]")
             msg += "\n"
             msg += "\n".join(memories)
 
