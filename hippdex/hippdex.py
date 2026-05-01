@@ -67,7 +67,12 @@ class HippDex:
 
         self.corpus = []
         for chat in self.history:
-            self.corpus.append(chat["content"].split("[START OF OLD MEMORIES]")[0])
+            if chat["role"] == "system":
+                continue
+            self.corpus += (chat["content"].split("[START OF OLD MEMORIES]")[0]).split(
+                ". "
+            )
+        print(self.corpus)
         tokens = bm25s.tokenize(self.corpus, stopwords="en")
         self.indexer.index(tokens)
         self.embedder.embed(self.corpus[-2])
