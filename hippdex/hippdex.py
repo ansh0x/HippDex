@@ -8,7 +8,7 @@ import bm25s
 
 
 class HippDex:
-    def __init__(self, model, embedder: Embedding, model_type: str = "GGUF") -> None:
+    def __init__(self, model, embedder, model_type: str = "GGUF") -> None:
         self.model = model
         self.type = model_type
         self.embedder = embedder
